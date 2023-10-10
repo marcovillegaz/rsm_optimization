@@ -66,6 +66,7 @@ def residual_plot(model, X, y_exp, normalize="None", path="None"):
     ax.set_xlabel("y predicted")
     ax.set_ylabel(ylabel)
     ax.grid(True)
+
     # 2. Normal distribution with histogram
     N = 17  # number measurement
     num_bins = 9  # numebr of bars in histograms
@@ -184,8 +185,8 @@ def pred_exp_plot(model, X, y_exp, path="None"):
     ax.scatter(x=y_pred, y=y_exp)
     ax.plot([0, 1], [0, 1], transform=ax.transAxes)
 
-    ax.set_xlim([0, 40])
-    ax.set_ylim([0, 40])
+    ax.set_xlim([0, 0.5])
+    ax.set_ylim([0, 0.5])
     ax.set_ylabel("Experimental")
     ax.set_xlabel("Predicted")
     ax.grid(True)
@@ -260,13 +261,13 @@ def main(data_path, effects, response, save_path, coeff_file, del_coeff=[]):
 
 ########################### MAIN CODE ####################################
 data_path = r"rsm_results.csv"  # File of experimental results
-save_path = r"EF"  # Folder for save regression analysis plots
-coeff_file = "model_coeff_EF.csv"  # File name of the final coefficients series
+save_path = r"Rec"  # Folder for save regression analysis plots
+coeff_file = "model_coeff_REC.csv"  # File name of the final coefficients series
 
 effects = ["Extractant-dispersant ratio", "Sample volume", "Extractant mixture volume"]
-response = ["Enrichment factor"]
+response = ["Recovery"]
 
 # This terms of the model will be deleted
-del_coeff = ["b0", "b3", "b12", "b13", "b23", "b33"]
+del_coeff = ["b0", "b2", "b3", "b23", "b12", "b11"]
 
 main(data_path, effects, response, save_path, coeff_file, del_coeff)

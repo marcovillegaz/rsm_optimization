@@ -13,7 +13,7 @@ def response_surface(factors):
     # model for enrichment factor:
     #   y = b1*x1 + b2*x2 + b11*x1^2 + b22*x2^2
     # factor = [X1,X2]
-    X1, X2 = factors
+    X1, X2, X3 = factors
     Y = (
         +coefficients[0] * X1
         + coefficients[1] * X2
@@ -35,7 +35,7 @@ def objective_function(factors):
         return 1e6  # A large penalty if the constraint is violated
 
 
-def optimization():
+def optimization(factor_bounds, initial_factors_guess):
     # Bounds for factors (adjust as needed) non codified
     factor_bounds = [
         (0.36, 2.14),
@@ -65,7 +65,13 @@ def optimization():
     return optimal_factors, optimal_response
 
 
-def model_plot(results_df=[], fixed_val=[1.25, 9, 390]):
+def model_plot(
+    exp_df,
+    response,
+    var_effects,
+    fixed_effect,
+    fixed_val=390,
+):
     """This function plot a response surface model with 3 factor and one reponse.
     Owing to the nature of the design, the response surface is 3-Dimensions. In order
     to plot the surface, the factor x3 has a fixed value.
@@ -80,40 +86,15 @@ def model_plot(results_df=[], fixed_val=[1.25, 9, 390]):
 
     grid_space = 10  # fixed
 
-
-def main():
-    path = r"C:\Users\marco\python-projects\rsm_design\rsm_results.csv"
-
-    effects = [
-        "Extractant-dispersant ratio",
-        "Sample volume",
-        "Extractant mixture volume",
-    ]
-    response = ["Enrichment factor"]
-
-    print("Importing data".center(80, "="))
-
-    data = pd.read_csv(path, sep=";", decimal=",")
-
-    # Data frame with columns = [effects,response]
-    exp_df = data[effects + response]
-    print("\n", exp_df)
-
-    ############### CREATE A FUNCTION WITH THIS ################################
-    print("This function create the surface plot".center(80, "="))
-    grid_space = 50  # fixed
-
-    # Filtering experimental point for fixed effect (x3 = 390)
-    val = 390
-    exp_data = exp_df[exp_df["Extractant mixture volume"] == val]
+    # Filtering experimental point for fixed effect
+    exp_data = exp_df[exp_df[fixed_effect] == fixed_val]
     print(exp_data)
 
-    # DEfinign experimetnal points
-    x1_exp = exp_data["Extractant-dispersant ratio"]  # x axis
-    x2_exp = exp_data["Sample volume"]  # y axis
-    y_exp = exp_data["Enrichment factor"]  # z axis
+    # Definign experimetnal points
+    x1_exp = exp_data[var_effects[0]]  # x axis
+    x2_exp = exp_data[var_effects[1]]  # y axis
+    y_exp = exp_data[response]  # z axis
 
-    # model notation: y = f(x1,x2) "reponse_surface"
     x1_pred = np.linspace(min(x1_exp), max(x1_exp), grid_space)
     x2_pred = np.linspace(min(x2_exp), max(x2_exp), grid_space)
 
@@ -122,9 +103,6 @@ def main():
 
     # Predict using response_surfce function
     y_pred = response_surface([x1_pred, x2_pred])  # predict the response
-
-    ## Maximize the surface
-    optimal_factors, optimal_response = optimization()
 
     # Plot model visualization
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
@@ -165,6 +143,34 @@ def main():
     ax.locator_params(nbins=5, axis="x")
 
     plt.show()
+
+
+def main():
+    path = r"C:\Users\marco\python-projects\rsm_design\rsm_results.csv"
+
+    effects = [
+        "Extractant-dispersant ratio",
+        "Sample volume",
+        "Extractant mixture volume",
+    ]
+    response = ["Enrichment factor"]
+
+    print("Importing data".center(80, "="))
+
+    data = pd.read_csv(path, sep=";", decimal=",")
+
+    # Data frame with columns = [effects,response]
+    exp_df = data[effects + response]
+    print("\n", exp_df)
+
+    ## Maximize the surface
+    optimal_factors, optimal_response = optimization()
+
+    ############### CREATE A FUNCTION WITH THIS ################################
+
+    fixed_effect = "Extractant mixture volume"
+    var_effects = ["Extractant-dispersant ratio", "Sample volume"]
+    response = "Enrichment factor"
 
 
 main()
