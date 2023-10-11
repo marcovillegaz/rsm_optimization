@@ -65,8 +65,6 @@ def surface_plot(
         y: dataframe with the response
         fixed_val: fixed point for visualization of surface"""
 
-    # print("This function create the surface plot".center(80, "="))
-
     grid_space = 500  # fixed
 
     # Filtering experimental point for fixed effect
@@ -188,7 +186,7 @@ def main(data_path, coeff_file, effects, response):
     ############### CREATE A FUNCTION WITH THIS ################################
     fixed_effect = "Extractant mixture volume"
     var_effects = ["Extractant-dispersant ratio", "Sample volume"]
-    response = "Enrichment factor"
+    response = "Recovery"
 
     surface_plot(
         exp_df,
@@ -204,14 +202,14 @@ def main(data_path, coeff_file, effects, response):
 
 ###############################################################################
 data_path = "rsm_results.csv"
-coeff_file = "model_coeff_EF.csv"
+coeff_file = "model_coeff_REC.csv"
 
 effects = [
     "Extractant-dispersant ratio",
     "Sample volume",
     "Extractant mixture volume",
 ]
-response = ["Enrichment factor"]
+response = ["Recovery"]
 
 
 main(data_path, coeff_file, effects, response)
