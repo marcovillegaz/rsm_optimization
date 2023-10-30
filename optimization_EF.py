@@ -54,6 +54,7 @@ def surface_plot(
     optimal_factors=[],
     optimal_response=[],
     fixed_val=390,
+    path=None,
 ):
     """This function plot a response surface model with 3 factor and one reponse.
     Owing to the nature of the design, the response surface is 3-Dimensions. In order
@@ -133,10 +134,15 @@ def surface_plot(
     ax.locator_params(nbins=4, axis="x")
     ax.locator_params(nbins=5, axis="x")
 
-    plt.show()
+    if path != "None":
+        path = path + r"\surface_plot.png"
+        print("Saving figure in:", path)
+        plt.savefig(path)
+    else:
+        plt.show()
 
 
-def main(data_path, coeff_file, effects, response):
+def main(data_path, coeff_file, effects, response, save_path):
     ## READING DATA
     print("\nImporting experimental points")
     data = pd.read_csv(data_path, sep=";", decimal=",")
@@ -181,7 +187,7 @@ def main(data_path, coeff_file, effects, response):
     print("RESULTS".center(80, "="))
     print("Optimal factors")
     for i, opt_fact in enumerate(optimal_factors):
-        print("\tX{}:{}".format(i, opt_fact))
+        print("\tX{}:{}".format(i + 1, opt_fact))
     print("Optimal Response")
     print("\ty:{}".format(optimal_response))
 
@@ -199,12 +205,14 @@ def main(data_path, coeff_file, effects, response):
         optimal_factors,
         optimal_response,
         fixed_val=390,
+        path=save_path,
     )
 
 
 ###############################################################################
 data_path = "rsm_results.csv"
 coeff_file = "model_coeff_EF.csv"
+save_path = "EF"
 
 effects = [
     "Extractant-dispersant ratio",
@@ -213,5 +221,4 @@ effects = [
 ]
 response = ["Enrichment factor"]
 
-
-main(data_path, coeff_file, effects, response)
+main(data_path, coeff_file, effects, response, save_path)
