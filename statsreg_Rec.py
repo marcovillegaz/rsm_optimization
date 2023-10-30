@@ -185,8 +185,8 @@ def pred_exp_plot(model, X, y_exp, path="None"):
     ax.scatter(x=y_pred, y=y_exp)
     ax.plot([0, 1], [0, 1], transform=ax.transAxes)
 
-    ax.set_xlim([0, 0.5])
-    ax.set_ylim([0, 0.5])
+    ax.set_xlim([20, 50])
+    ax.set_ylim([20, 50])
     ax.set_ylabel("Experimental")
     ax.set_xlabel("Predicted")
     ax.grid(True)
