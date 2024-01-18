@@ -14,6 +14,7 @@ The code is only valid for three effects and one response. You can adapt to code
 modifiying the coeff list in main() and adding more effects """
 
 # lIBRARIES
+import os
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -66,6 +67,7 @@ def residual_plot(model, X, y_exp, normalize="None", path="None"):
     ax.set_xlabel("y predicted")
     ax.set_ylabel(ylabel)
     ax.grid(True)
+
     # 2. Normal distribution with histogram
     N = 17  # number measurement
     num_bins = 9  # numebr of bars in histograms
@@ -184,8 +186,8 @@ def pred_exp_plot(model, X, y_exp, path="None"):
     ax.scatter(x=y_pred, y=y_exp)
     ax.plot([0, 1], [0, 1], transform=ax.transAxes)
 
-    ax.set_xlim([0, 40])
-    ax.set_ylim([0, 40])
+    # ax.set_xlim([20, 50])
+    # ax.set_ylim([20, 50])
     ax.set_ylabel("Experimental")
     ax.set_xlabel("Predicted")
     ax.grid(True)
@@ -198,7 +200,7 @@ def pred_exp_plot(model, X, y_exp, path="None"):
         plt.show()
 
 
-def main(data_path, effects, response, save_path, coeff_file, del_coeff=[]):
+def main(data_path, effects, response, result_path, del_coeff=[]):
     """main() function.
 
     Inputs:
@@ -210,63 +212,162 @@ def main(data_path, effects, response, save_path, coeff_file, del_coeff=[]):
         del_coeff: list of the ommited coefficient of the model. Used to
             get better fit discarting terms with high p-values.
     """
-    # Create dataframe with coefficents name
+    # CONSTANTS
+    ## Create dataframe with coefficents name
     coeff = ["b0", "b1", "b2", "b3", "b11", "b12", "b13", "b22", "b23", "b33"]
-    # Polinomial feature: define the model as quadrati
-    polynomial_features = PolynomialFeatures(degree=2)
 
-    ## IMPORTING AND REARRENGMENT
+    # PREPROCESSING
+    ## Create result folder
+    if not os.path.exists(result_path):
+        # If it doesn't exist, create the folder
+        os.mkdir(result_path)
+        print(f"Folder '{result_path}' created.")
+    else:
+        print(f"Folder '{result_path}' already exists.")
+
+    ## IMPORTING AND PREPROCESSING DATAFRAME
     print("Importing data".center(80, "="))
-    raw_data = pd.read_csv(data_path, sep=";", decimal=",")
+
+    raw_data = pd.read_csv(data_path, sep=";", decimal=",")  # Import csv file
+    raw_data = raw_data.dropna()  # Drop NaN values
+    raw_data["Recovery"] = raw_data["Recovery"] * 100
+    print("\n This is the raw_data:\n", raw_data)
+
+    raw_data = raw_data.iloc[4:25, :]  # Select RSM data  (IMPORTANT)
+    raw_data = raw_data.reset_index(drop=True)  # Reset index
+    print(raw_data)
+
+    ############################################################################
+    # raw_data = raw_data.drop(20)  # Delete RSM_15 repeated points
+    raw_data = raw_data.drop(14)  # Delete RSM_15 repeated points
+    raw_data = raw_data.reset_index(drop=True)  # Reset index
+    ############################################################################
+
     # Data frame with columns = [effects,response]
     data_df = raw_data[effects + response]
-    print("\n", data_df.head())
+    print("\n", data_df)
 
     ## Model fitting preprocessing
     X = data_df[effects]
-    X = polynomial_features.fit_transform(X)
-    X = pd.DataFrame(data=X, columns=coeff)
     y = data_df[response]
 
-    # Deleting terms of the model
-    X = X.drop(del_coeff, axis=1)
+    polynomial_features = PolynomialFeatures(degree=2)  # Define the model as quadrati
+    X = polynomial_features.fit_transform(X)  # Apply cuadratic model to X
+    X = pd.DataFrame(data=X, columns=coeff)  # Define X as dataframe
+    X = X.drop(del_coeff, axis=1)  # Deleting terms of the model (for best fit)
 
-    # Fitting the model
+    # Fitting the model and show summary
     model = sm.OLS(y, X).fit()
     print("\n", model.summary(), "\n")
 
-    # Generate series with coefficient for further analysis
-    params = model.params
-    # Series with zeros for all coefficients
-    coeff_series = pd.Series(0.0, index=coeff)
-    # Update the coefficients Series with values from the params Series
-    coeff_series[params.index] = params
-    # Print the resulting coefficients Series
-    print("Coefficients Series:")
-    print(coeff_series)
+    # Save model stats in results folder
+    print("Saving model statistics...")
+    with open(os.path.join(result_path, "model_stats.txt"), "w") as fh:
+        fh.write(model.summary().as_text())
 
-    # Saving coefficient in csv file for further analysis
-    print("Saving model coefficient in:", coeff_file)
-    coeff_series.to_csv(coeff_file, header=False)
+    # MODEL PARAMETERS
+    ## Series with zeros for all coefficients
+    coeff_series = pd.Series(0.0, index=coeff)
+    ## Generate series with coefficient for further analysis
+    params = model.params
+    ## Update the coefficients Series with values from  params Series
+    coeff_series[params.index] = params
+    ## Print the resulting coefficients Series
+    print("Coefficients Series:\n", coeff_series)
+    ## Saving coefficient in csv file for further analysis
+    print("Saving model coefficient...")
+    coeff_series.to_csv(os.path.join(result_path, "model_params.csv"), header=False)
 
     ## PLOT REGRESSION ANAYLISIS
     # Coefficient plot
-    coef_plot(model, normalize="None", whiskers="ci", path=save_path)
+    coef_plot(model, normalize="None", whiskers="ci", path=result_path)
     # Residual plot
-    residual_plot(model, X, y, normalize="True", path=save_path)
+    residual_plot(model, X, y, normalize="True", path=result_path)
     # Predicted vs experimental plot
-    pred_exp_plot(model, X, y, path=save_path)
+    pred_exp_plot(model, X, y, path=result_path)
 
 
 ########################### MAIN CODE ####################################
-data_path = r"rsm_results.csv"  # File of experimental results
-save_path = r"EF"  # Folder for save regression analysis plots
-coeff_file = "model_coeff_EF.csv"  # File name of the final coefficients series
+effects_list = [
+    "Extractant-Dispersant Ratio",
+    "Sample volume",
+    "Extraction mixture volume",
+]
 
-effects = ["Extractant-dispersant ratio", "Sample volume", "Extractant mixture volume"]
-response = ["Enrichment factor"]
+## SECOND RUN WITH EXPERIMENTAL SAMPLE CONCENTRATION
+main(
+    data_path=r"RSM_2.csv",
+    effects=effects_list,
+    response=["Recovery"],
+    result_path=r"Result_REC - run2_exp_b",
+    del_coeff=[
+        "b0",
+        # "b1",
+        # "b2",
+        "b3",
+        # "b12",
+        "b13",
+        "b23",
+        "b11",
+        "b22",
+        "b33",
+    ],  # Ommited terms of the model
+)
 
-# This terms of the model will be deleted
-del_coeff = ["b0", "b3", "b12", "b13", "b23", "b33"]
+main(
+    data_path=r"RSM_2.csv",
+    effects=effects_list,
+    response=["Enrichment factor"],
+    result_path=r"Result_EF - run2_exp_b",
+    del_coeff=[
+        "b0",
+        # "b1",
+        # "b2",
+        "b3",
+        "b12",
+        "b13",
+        # "b23",
+        # "b11",
+        # "b22",
+        "b33",
+    ],  # Ommited terms of the model
+)
 
-main(data_path, effects, response, save_path, coeff_file, del_coeff)
+## SECOND RUN WITH THEORIC SAMPLE CONCENTRATION
+main(
+    data_path=r"RSM_3.csv",
+    effects=effects_list,
+    response=["Recovery"],
+    result_path=r"Result_REC - run2_theo_b",
+    del_coeff=[
+        "b0",
+        # "b1",
+        # "b2",
+        "b3",
+        # "b12",
+        "b13",
+        "b23",
+        "b11",
+        "b22",
+        "b33",
+    ],  # Ommited terms of the model
+)
+
+main(
+    data_path=r"RSM_3.csv",
+    effects=effects_list,
+    response=["Enrichment factor"],
+    result_path=r"Result_EF - run2_theo_b",
+    del_coeff=[
+        "b0",
+        # "b1",
+        # "b2",
+        "b3",
+        "b12",
+        "b13",
+        # "b23",
+        # "b11",
+        # "b22",
+        "b33",
+    ],  # Ommited terms of the model
+)

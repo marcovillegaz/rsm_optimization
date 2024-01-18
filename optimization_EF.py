@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
@@ -46,14 +47,10 @@ def objective_function(factors, coefficients, length, center):
 
 
 def surface_plot(
-    exp_df,
+    exp_data,
     coefficients,
     response,
-    var_effects,
-    fixed_effect,
-    optimal_factors=[],
-    optimal_response=[],
-    fixed_val=390,
+    effects,
     path=None,
 ):
     """This function plot a response surface model with 3 factor and one reponse.
@@ -66,22 +63,32 @@ def surface_plot(
         y: dataframe with the response
         fixed_val: fixed point for visualization of surface"""
 
-    # print("This function create the surface plot".center(80, "="))
+    print("This function create the surface plot".center(80, "="))
+    grid_space = 30  # fixed
 
-    grid_space = 500  # fixed
+    # Accessing values without extracting
+    # fixed_effect = next(iter(fixed_effect_dic))
+    # fixed_val = float(fixed_effect_dic[fixed_effect])
+    # print("Fixed effect: ", fixed_effect, " at ", fixed_val)
 
     # Filtering experimental point for fixed effect
-    exp_data = exp_df[exp_df[fixed_effect] == fixed_val]
+    # exp_data = exp_data[exp_data[fixed_effect] == fixed_val]
+    # print("This are the experimetnal points to plot\n", exp_data)
 
     # Definign experimetnal points
-    x1_exp = exp_data[var_effects[0]]  # x axis
-    x2_exp = exp_data[var_effects[1]]  # y axis
-    x3_exp = exp_data[fixed_effect]  # Fixed effect
-    y_exp = exp_data[response]  # z axis
+    print("effects: ", effects)
+    print("response: ", response)
+    print(exp_data[effects[2]])
+    x1_exp = exp_data[effects[0]]  # x1
+    x2_exp = exp_data[effects[1]]  # x2
+    x3_exp = exp_data[effects[2]]  # x3
+    y_exp = exp_data[response]  # y response
 
+    # Define surface boundary (change linspace to step array)
     x1_pred = np.linspace(min(x1_exp), max(x1_exp), grid_space)
     x2_pred = np.linspace(min(x2_exp), max(x2_exp), grid_space)
-    x3_pred = np.ones(grid_space) * fixed_val
+    x3_pred = np.linspace(min(x3_exp), max(x3_exp), grid_space)
+    print(x1_exp)
 
     # Create grid to predict response
     x1_pred, x2_pred, x3_pred = np.meshgrid(x1_pred, x2_pred, x3_pred)
@@ -91,41 +98,58 @@ def surface_plot(
         [x1_pred, x2_pred, x3_pred],
         coefficients,
     )
+    print(y_pred)
+
+    # FIXED VAR AND VALUE
+    # Supossing fixed var is x1 at the i element.
+    fixed_index = 15
 
     # Plot model visualization
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
     ax.view_init(elev=30, azim=45, roll=0)
-    # Plot experimental points
-    ax.plot(
-        x1_exp,
-        x2_exp,
-        y_exp,
-        color="k",
-        zorder=15,
-        linestyle="none",
-        marker="o",
-        alpha=0.5,
-    )
+
     # Plot surface
-    ax.plot_surface(
-        x1_pred[:, :, 0],
-        x2_pred[:, :, 0],
-        y_pred[:, :, 0],
+    surface_plot = ax.plot_surface(
+        x1_pred[:, :, fixed_index],
+        x2_pred[:, :, fixed_index],
+        y_pred[:, :, fixed_index],
         cmap=cm.coolwarm,
         linewidth=0,
         antialiased=False,
     )
 
+    # Loop
+    for i in range(grid_space):
+        # creating new Y values
+        new_x = x1_pred[:, :, i]
+        new_y = x2_pred[:, :, i]
+        new_z = y_pred[:, :, i]
+
+        # updating data values
+        surface_plot.set_xdata(new_x)
+        surface_plot.set_ydata(new_y)
+        surface_plot.set_zdata(new_z)
+
+        # drawing updated values
+        fig.canvas.draw()
+
+        # This will run the GUI event
+        # loop until all UI events
+        # currently waiting have been processed
+        fig.canvas.flush_events()
+
+        time.sleep(0.1)
+
     # Plot maximal point
-    ax.plot(
-        optimal_factors[0],
-        optimal_factors[1],
-        optimal_response,
-        color="g",
-        zorder=15,
-        linestyle="none",
-        marker="o",
-    )
+    # ax.plot(
+    #     optimal_factors[0],
+    #     optimal_factors[1],
+    #     optimal_response,
+    #     color="g",
+    #     zorder=15,
+    #    linestyle="none",
+    #    marker="o",
+    # )
 
     # Set axes configuration
     ax.set_xlabel(x1_exp.name, fontsize=12)
@@ -142,12 +166,12 @@ def surface_plot(
         plt.show()
 
 
-def main(data_path, coeff_file, effects, response, save_path):
+def main(data_path, coeff_file, response):
     ## READING DATA
-    print("\nImporting experimental points")
-    data = pd.read_csv(data_path, sep=";", decimal=",")
-    exp_df = data[effects + response]  # Data frame with columns = [effects,response]
-    print(exp_df)
+    # print("\nImporting experimental points")
+    # data = pd.read_csv(data_path, sep=";", decimal=",")
+    # exp_df = data[effects + response]  # Data frame with columns = [effects,response]
+    # print(exp_df)
 
     print("\nImporting model coefficientes as list.")
     coeff_df = pd.read_csv(coeff_file, index_col=None, header=None)
@@ -159,13 +183,13 @@ def main(data_path, coeff_file, effects, response, save_path):
     # This is the diference beetween the center point and the axial point (alpha)
     # of the central composite design circumbcribed (CCC)
 
-    length = [0.89, 4.54, 16.82]
-    initial_factors_guess = [1.25, 9, 390]
-    centre_point = [1.25, 9, 390]
+    length = [0.89, 4.54, 185]
+    initial_factors_guess = [1.25, 9, 300]
+    centre_point = [1.25, 9, 300]
     factor_bounds = [
         (0.36, 2.14),
         (4.46, 13.54),
-        (373.18, 406.82),
+        (115, 485),
     ]
 
     # Perform the optimization
@@ -192,33 +216,43 @@ def main(data_path, coeff_file, effects, response, save_path):
     print("\ty:{}".format(optimal_response))
 
     ############### CREATE A FUNCTION WITH THIS ################################
-    fixed_effect = "Extractant mixture volume"
-    var_effects = ["Extractant-dispersant ratio", "Sample volume"]
-    response = "Enrichment factor"
-
-    surface_plot(
-        exp_df,
-        coefficients,
-        response,
-        var_effects,
-        fixed_effect,
-        optimal_factors,
-        optimal_response,
-        fixed_val=390,
-        path=save_path,
-    )
+    # Import experimental data
+    exp_data = pd.read_csv(data_path, sep=";", decimal=",")  # Import csv file
+    exp_data = exp_data.dropna()  # Drop NaN values
+    exp_data["Recovery"] = exp_data["Recovery"] * 100
+    print("\n This is the raw_data:\n", exp_data)
+    print(exp_data.columns)
 
 
 ###############################################################################
-data_path = "rsm_results.csv"
-coeff_file = "model_coeff_EF.csv"
-save_path = "EF"
+data_path = r"C:\Users\marco\python-projects\rsm_design\RSM_3.csv"
+coeff_file_REC = (
+    r"C:\Users\marco\python-projects\rsm_design\Result_REC - run3\model_params.csv"
+)
+
+coeff_file_EF = (
+    r"C:\Users\marco\python-projects\rsm_design\Result_EF - run3\model_params.csv"
+)
+
+
+save_path = "REC optimized"
 
 effects = [
-    "Extractant-dispersant ratio",
+    "Extractant-Dispersant Ratio",
     "Sample volume",
-    "Extractant mixture volume",
+    "Extraction mixture volume",
 ]
-response = ["Enrichment factor"]
 
-main(data_path, coeff_file, effects, response, save_path)
+print("\n" + "RECOVERY OPTIMIZATION".center(80, "="))
+main(
+    data_path,
+    coeff_file_REC,
+    response="Recovery",
+)
+
+""" print("\n" + "EF OPTIMIZATION".center(80, "="))
+main(
+    data_path,
+    coeff_file_EF,
+    response="Enrichment factor",
+) """

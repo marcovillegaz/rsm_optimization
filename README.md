@@ -21,4 +21,11 @@ experimental factors. In this case a CCD design is only valid in the zone
 constrained by the experimental factor (cirumference o sphere). Then, the
 response surface is plotted with the eeperimental points and the maximum response.
 
-caca
+## screening.py (remake the figures)
+This script perform analytical analisis for the screening step en DLLME for 
+factor extractant solvent (HDES) and centrifugue time. The code perfom an 
+Analysis of Varience and Tuke HSD test to indetify significative difference between groups. The a box plot is created for each factor to visualize the effect in the repsonse Enrichment factor
+
+## response_surface_fit.py (revisit plotting functions)
+
+
