@@ -3,8 +3,8 @@
 Dep. Variable:      Enrichment factor   R-squared:                       0.803
 Model:                            OLS   Adj. R-squared:                  0.763
 Method:                 Least Squares   F-statistic:                     20.33
-Date:                Wed, 17 Jan 2024   Prob (F-statistic):           1.53e-05
-Time:                        21:09:07   Log-Likelihood:                -53.442
+Date:                Fri, 26 Jan 2024   Prob (F-statistic):           1.53e-05
+Time:                        12:56:59   Log-Likelihood:                -53.442
 No. Observations:                  19   AIC:                             114.9
 Df Residuals:                      15   BIC:                             118.7
 Df Model:                           3                                         

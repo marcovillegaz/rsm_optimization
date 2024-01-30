@@ -114,8 +114,8 @@ def rsm_plot(
     effects,
     fixed_effect,
     plot_type,
-    scatter="True",
-    optimum="None",
+    scatter=None,
+    optimum=None,
     path=None,
 ):
     grid_space = 100  # CONSTANT
@@ -150,10 +150,11 @@ def rsm_plot(
     # Create grid to predict response
     x1_pred, x2_pred, x3_pred = np.meshgrid(X_pred[0, :], X_pred[1, :], X_pred[2, :])
     mesh = [x1_pred, x2_pred, x3_pred]
-    print(mesh)
+    # print(mesh)
+
     # Predict using response_surface function
     y_pred = response_surface(mesh, coefficients)
-    print(y_pred)
+    # print(y_pred)
 
     # PLOT SURFACE OR CONTOUR
     if plot_type == "contour":
@@ -166,7 +167,7 @@ def rsm_plot(
             y_pred[0, :, :],
             levels=20,
             cmap="hot",
-            alpha=1,
+            alpha=0.9,
             antialiased=False,
         )
 
@@ -194,34 +195,60 @@ def rsm_plot(
 
     elif plot_type == "surface":
         # Create an empty figure and 3D axis
-        fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+        # fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+        ax = plt.axes(projection="3d", computed_zorder=False)
+        plt.subplots_adjust(left=0.0, right=1, bottom=0.0, top=1.1)
+
         surf = ax.plot_surface(
             mesh[idx_of_var[0]][0, :, :],
             mesh[idx_of_var[1]][0, :, :],
             y_pred[0, :, :],
-            cmap="hot",
+            cmap="coolwarm",
             alpha=0.6,
             antialiased=True,
-            rcount=100,
-            ccount=100,
+            # rcount=100,
+            # ccount=100,
+            zorder=5,
         )
 
         # Plot experimental points
         if scatter == "True":
+            x = exp_data.iloc[:, 0:3].to_numpy()
+            y_pred = response_surface([x[:, 0], x[:, 1], x[:, 2]], coefficients)
+            resd = exp_data[response].to_numpy() - y_pred
+            print("REsiduals:\n", resd)
+
+            up_idx = np.where(resd < 0)[0]
+            low_idx = np.where(resd > 0)[0]
+
             ax.scatter(
-                xs=exp_data.iloc[:, idx_of_var[0]],
-                ys=exp_data.iloc[:, idx_of_var[1]],
-                zs=exp_data[response],
+                xs=exp_data.iloc[up_idx, idx_of_var[0]],
+                ys=exp_data.iloc[up_idx, idx_of_var[1]],
+                zs=exp_data[response].to_numpy()[up_idx],
                 marker=".",
-                c="blue",
+                c="red",
+                zorder=2,
+                depthshade=False,
             )
+
+            ax.scatter(
+                xs=exp_data.iloc[low_idx, idx_of_var[0]],
+                ys=exp_data.iloc[low_idx, idx_of_var[1]],
+                zs=exp_data[response].to_numpy()[low_idx],
+                marker=".",
+                c="red",
+                zorder=10,
+                depthshade=False,
+            )
+
         if optimum != "None":
             ax.scatter(
                 xs=optimum[0][idx_of_var[0]],
                 ys=optimum[0][idx_of_var[1]],
-                zs=optimum[1],
+                zs=optimum[1] * 1.05,
                 marker="*",
                 c="green",
+                zorder=1,
             )
 
         ax.view_init(azim=45, elev=20)  # Set view
@@ -230,7 +257,7 @@ def rsm_plot(
         # Set labels and title
         ax.set_xlabel(effects[idx_of_var[0]] + " (mL)")
         ax.set_ylabel(effects[idx_of_var[1]] + " ($\mu$L)")
-        ax.set_zlabel(response + " (%)")
+        ax.set_zlabel(response)
 
     if path != "None":
         path = path + r"\RSM_EF.png"
