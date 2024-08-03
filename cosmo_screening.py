@@ -1,62 +1,63 @@
-import os
-import numpy as np
+"""This script create a bar plot with the result obtaining from the COSMO-RS
+screening between PCB77 and different HDES"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
+from matplotlib.ticker import MultipleLocator
 
 
-def cosmos_screening(file_path, save_path="None"):
-    """DESCRIPTION"""
-    df = pd.read_csv(file_path, sep=";", decimal=",")  # Read CSV file into a DataFrame
-    print(df)
-    df.set_index("DES", inplace=True)  # Set the "indexes" column as the index
-    print(df)  # Display the DataFrame
+# Read CSV file into a DataFrame
+df = pd.read_csv(r"cosmo_screening_result\COSMO_screening.csv", sep=";", decimal=",")
+# Set the "indexes" column as the index
+df.set_index("DES", inplace=True)
+# Display the DataFrame
+print(df)
 
-    # Plotting
-    ax = df.plot(
-        kind="bar",
-        figsize=(5, 6),
-        rot=0,
-        # colormap="Dark2",
-        width=0.8,
-    )
+# Create the plot
+fig, ax1 = plt.subplots(figsize=(6, 6))
 
-    # Set axis labels and title
-    ax.set_xlabel("Polymers")
-    ax.set_ylabel(r"$Ln(\gamma)$")
-    ax.grid(linewidth=0.5)
+# Plot the bar plot
+color = "tab:blue"
+ax1.set_xlabel("DES")
+ax1.set_ylabel("PCB77", color=color)
+ax1.bar(df.index, df["PCB77"], color=color, alpha=0.6, label="PCB77")
+ax1.set_ylabel(r"$Ln(\gamma_{PCB77})$")
+ax1.tick_params(axis="y", labelcolor=color)
 
-    # Annotate each bar with its numeric value
-    for container in ax.containers:
-        ax.bar_label(
-            container,
-            fmt="%.2f",
-            label_type="edge",
-            fontsize=8,
-            color="black",
-            # weight="bold",
-            rotation=0,
-        )
+# Create another y-axis for the scatter plot
+ax2 = ax1.twinx()
+color = "tab:red"
+ax2.set_ylabel("Water", color=color)
+ax2.scatter(df.index, df["Water"], color=color, marker="s", label="Water")
+ax2.set_ylabel(r"$Ln(\gamma_{water})$")
+ax2.tick_params(axis="y", labelcolor=color)
 
-    plt.xticks(rotation=45)  # Rotate x-axis labels vertically
-    # Adjust layout
-    plt.tight_layout()
+# Add horizontal line to the primary y-axis
+ax1.axhline(y=0, color="black", linestyle="-", linewidth=0.5)
 
-    # Show or save image
-    if save_path == "None":
-        plt.show()
-    else:
-        save_path = os.path.join(save_path, "COSMOS_bar_plot.png")
-        print("\nSaving in plot in: ", save_path)
-        plt.savefig(save_path, dpi=800)
+# Align the y-axes
+ax1.set_ylim([-2, 8])
+ax1.yaxis.set_major_locator(MultipleLocator(1))
+ax2.set_ylim([-2, 8])
+ax2.yaxis.set_major_locator(MultipleLocator(1))
 
-    # plt.close("all")
+# Combine legends from both axes
+handles1, labels1 = ax1.get_legend_handles_labels()
+handles2, labels2 = ax2.get_legend_handles_labels()
 
-
-# Replace 'your_file.csv' with the actual path to your CSV file
-file_path = r"C:\Users\marco\OneDrive - usach.cl\DLLME of PCB77 employing designed DES\Hojas de calculo\COSMO_screening.csv"
-
-cosmos_screening(
-    file_path,
-    save_path=r"C:\Users\marco\OneDrive - usach.cl\DLLME of PCB77 employing designed DES\images",
+# Create a combined legend
+fig.legend(
+    handles1 + handles2,
+    labels1 + labels2,
+    loc="upper left",
+    bbox_to_anchor=(0.11, 0.97),
+    frameon=False,
 )
+
+ax1.set_xticklabels(df.index, rotation=45, ha="right")
+plt.tight_layout()
+
+
+# Save the plot as a JPEG image
+plt.savefig(r"cosmo_screening_result\COSMO_RS_screening.jpeg", dpi=800)
+plt.show()
