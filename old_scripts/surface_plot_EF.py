@@ -166,7 +166,7 @@ def rsm_plot(
             mesh[idx_of_var[1]][0, :, :],
             y_pred[0, :, :],
             levels=20,
-            cmap="hot",
+            cmap="summer",
             alpha=0.9,
             antialiased=False,
         )
@@ -177,7 +177,7 @@ def rsm_plot(
                 x=exp_data.iloc[:, idx_of_var[0]],
                 y=exp_data.iloc[:, idx_of_var[1]],
                 marker=".",
-                c="blue",
+                c="red",
             )
 
         if optimum != "None":
@@ -190,7 +190,7 @@ def rsm_plot(
 
         # Set labels and title
         fig.colorbar(contour, shrink=1, aspect=10)  # Add a color bar
-        ax.set_xlabel(effects[idx_of_var[0]] + " (mL)")
+        ax.set_xlabel(effects[idx_of_var[0]])
         ax.set_ylabel(effects[idx_of_var[1]] + " ($\mu$L)")
 
     elif plot_type == "surface":
@@ -203,7 +203,7 @@ def rsm_plot(
             mesh[idx_of_var[0]][0, :, :],
             mesh[idx_of_var[1]][0, :, :],
             y_pred[0, :, :],
-            cmap="coolwarm",
+            cmap="summer",
             alpha=0.6,
             antialiased=True,
             # rcount=100,
@@ -294,8 +294,9 @@ rsm_plot(
         "Extraction mixture volume",
     ],
     fixed_effect="Sample volume",
-    plot_type="surface",
-    scatter="True",
-    optimum=[optimal_factors, optimal_response],
-    path=r"C:\Users\marco\python-projects\rsm_design\surface_plots",
+    plot_type="contour",
+    scatter="False",
+    # optimum=[optimal_factors, optimal_response],
+    optimum="None",
+    path=r"C:\Users\marco\python-projects\rsm_design\contour_plots",
 )

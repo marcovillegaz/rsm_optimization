@@ -1,19 +1,11 @@
-"""
-Title: "Response surface methodology for three factors and one response"
-Author: Marco Villegas
-Date: 10/10/2013
-Github: https://github.com/Marcodelflow
-
-Description:
-This scrips fit a cuadratic multilinear model in order to generate a repsonse 
-surface for further optimization. The code used the experimetnal results of a 
-central composite design (CCD) which data is allocated ina csv file (see
-rsm_results.csv).
+"""This scrips fits experimental data into a cuadratic multilinear model 
+in order to generate a response surface for further optimization. The code 
+used the experimetnal results of a central composite design (CCD) which data is 
+allocated i na csv file.
 
 The code is only valid for three effects and one response. You can adapt to code 
-modifiying the coeff list in main() and adding more effects """
+modifiying the coeff list in main() and adding more effects"""
 
-# lIBRARIES
 import os
 import numpy as np
 import pandas as pd
