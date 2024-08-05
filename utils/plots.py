@@ -7,6 +7,8 @@ from scipy.stats import norm
 from matplotlib import pyplot as plt
 from sklearn.metrics import mean_squared_error
 
+DPI = 600
+
 
 def residual_plot(model, X, y_exp, response, normalize=None, folder=None):
     """This function create a residual plot to analyses their distribution
@@ -66,7 +68,7 @@ def residual_plot(model, X, y_exp, response, normalize=None, folder=None):
     if folder != None:
         file_name = f'{response.replace(" ", "")}_rsd_plot.png'
         print(f"\tSaving {file_name}")
-        plt.savefig(os.path.join(folder, file_name))
+        plt.savefig(os.path.join(folder, file_name), dpi=DPI)
     else:
         plt.show()
 
@@ -132,7 +134,7 @@ def coeff_plot(model, response, normalize=None, whiskers="ci", folder=None):
     if folder != None:
         file_name = f'{response.replace(" ", "")}_coeff_plot.png'
         print(f"\tSaving {file_name}")
-        plt.savefig(os.path.join(folder, file_name))
+        plt.savefig(os.path.join(folder, file_name), dpi=DPI)
     else:
         plt.show()
 
@@ -173,6 +175,6 @@ def prediction_plot(model, X, y_exp, response, folder=None):
     if folder != None:
         file_name = f'{response.replace(" ", "")}_prediction_plot.png'
         print(f"\tSaving {file_name}")
-        plt.savefig(os.path.join(folder, file_name))
+        plt.savefig(os.path.join(folder, file_name), dpi=DPI)
     else:
         plt.show()
