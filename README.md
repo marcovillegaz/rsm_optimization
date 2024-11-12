@@ -28,4 +28,15 @@ Analysis of Varience and Tuke HSD test to indetify significative difference betw
 
 ## response_surface_fit.py (revisit plotting functions)
 
+## cosmo_screening.py 
+This script create a bar plot with the result obtaining from the COSMO-RS
+screening between PCB77 and different HDES and save it in the same folder.
 
+## univar_analysis.py
+This scripts perform the univariate anaylsis for the four extractant candidates and the centrifuge time.
+ANOVA analysis and ad hoc test are realized. Then the result are plotted into a box plot. 
+
+## EF_surface.py
+Create a surface plot based on the results obtained. This scripts is only for maintaoinign constant one effect. Due the multidimension array
+when computing the predicted response.
+## REC_surface.py
