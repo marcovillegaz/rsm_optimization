@@ -15,7 +15,7 @@ from utils.plots import residual_plot, coeff_plot, prediction_plot
 # Change to import_experiment
 def extract_data(file_path, sheet_name, factors, response):
     """This function extract the factors and the response in the experimental
-    results matrix
+    results matrix allocated ina spreadsheet.
     input:
         file_path:
         sheet_name:
@@ -26,7 +26,6 @@ def extract_data(file_path, sheet_name, factors, response):
 
     data_df = pd.read_excel(file_path, sheet_name, skiprows=1)
     data_df = data_df.drop([0, 1])  # drop first two rows (useless)
-    print(data_df.columns)
     data_df = data_df[factors + [response]]  # Rearrangement of data
     data_df = data_df.reset_index(drop=True)  # Reset indexes
     data_df = data_df.apply(pd.to_numeric, errors="coerce")  # Convert to numeric type
@@ -207,110 +206,3 @@ def rsm_optimization(coefficients, exp_data):
     print("\ty:{}".format(optimal_response))
 
     return optimal_factors, optimal_response
-
-
-def rsm_plot(
-    coefficients,
-    experimental_df,
-    response,
-    factors,
-    fixed_factor,
-    scatter=None,
-):
-
-    grid_space = 100  # CONSTANT
-
-    # Find indexes of variable factors in experimetnal dataFrame
-    idx_of_var = [index for index, value in enumerate(factors) if value != fixed_factor]
-    print("Variable factors:", experimental_df.columns[idx_of_var])
-
-    # PREDICT SURFACE RESPONSE SURFACE FROM MODEL
-    # Define surface boundary
-    X_pred = np.ones((3, grid_space))  # Each row correspond to a effect
-    for i, factor in enumerate(factors):
-        # The fixed effect is taken in the central value
-        if factor == fixed_factor:
-            # The central value is repited n = 5 times
-            centre_point = experimental_df[factor].mode().values[0]
-            X_pred[i, :] = X_pred[i, :] * centre_point
-
-        else:
-            lb = min(experimental_df[factor])  # lower bound
-            ub = max(experimental_df[factor])  # Upper bound
-            dif = max(experimental_df[factor]) - min(experimental_df[factor])
-
-            # The surface is extended 25% of the experimental domain
-            percent = 0.25
-            X_pred[i, :] = np.linspace(
-                lb - percent * dif,
-                ub + percent * dif,
-                grid_space,
-            )
-
-    print(X_pred.transpose(), "\n")
-
-    # Create grid to predict response
-    x1_pred, x2_pred, x3_pred = np.meshgrid(X_pred[0, :], X_pred[1, :], X_pred[2, :])
-    mesh = [x1_pred, x2_pred, x3_pred]
-    # print(mesh)
-
-    # Predict using response_surface function
-    y_pred = response_surface(mesh, coefficients)
-    # print(y_pred)
-
-    # Create an empty figure and 3D axis
-    # fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    ax = plt.axes(projection="3d", computed_zorder=False)
-    plt.subplots_adjust(left=0.0, right=1, bottom=0.0, top=1.1)
-
-    surf = ax.plot_surface(
-        mesh[idx_of_var[0]][0, :, :],
-        mesh[idx_of_var[1]][0, :, :],
-        y_pred[0, :, :],
-        cmap="summer",
-        alpha=0.6,
-        antialiased=True,
-        # rcount=100,
-        # ccount=100,
-        zorder=5,
-    )
-
-    # Plot experimental points
-    if scatter == True:
-        x = experimental_df.iloc[:, 0:3].to_numpy()
-        y_pred = response_surface([x[:, 0], x[:, 1], x[:, 2]], coefficients)
-        resd = experimental_df[response].to_numpy() - y_pred
-        print("REsiduals:\n", resd)
-
-        up_idx = np.where(resd < 0)[0]
-        low_idx = np.where(resd > 0)[0]
-
-        # Experimental points above the surface
-        ax.scatter(
-            xs=experimental_df.iloc[up_idx, idx_of_var[0]],
-            ys=experimental_df.iloc[up_idx, idx_of_var[1]],
-            zs=experimental_df[response].to_numpy()[up_idx],
-            marker=".",
-            c="red",
-            zorder=2,
-            depthshade=False,
-        )
-
-        # Experimental points below the surface
-        ax.scatter(
-            xs=experimental_df.iloc[low_idx, idx_of_var[0]],
-            ys=experimental_df.iloc[low_idx, idx_of_var[1]],
-            zs=experimental_df[response].to_numpy()[low_idx],
-            marker=".",
-            c="red",
-            zorder=10,
-            depthshade=False,
-        )
-
-    # Set view and label
-    ax.view_init(azim=45, elev=20)  # Set view
-    ax.set_xlabel(factors[idx_of_var[0]] + " (mL)")
-    ax.set_ylabel(factors[idx_of_var[1]] + " (-)")
-    ax.set_zlabel(response)
-
-    plt.show()
