@@ -1,15 +1,23 @@
 """This script create a bar plot with the result obtaining from the COSMO-RS
 screening between PCB77 and different HDES"""
 
-import pandas as pd
+from pathlib import Path
+
 import matplotlib.pyplot as plt
+import pandas as pd
 from matplotlib.ticker import MultipleLocator
 
+repo_root = Path(__file__).resolve().parents[2]
+screening_file = repo_root / "data" / "dllme" / "cosmo" / "COSMO_screening.csv"
+results_folder = Path(__file__).parent / "results" / "cosmo"
+DPI = 800
+
+results_folder.mkdir(parents=True, exist_ok=True)
 
 # Read CSV file into a DataFrame
-df = pd.read_csv(r"cosmo_screening_result\COSMO_screening.csv", sep=";", decimal=",")
+df = pd.read_csv(screening_file, sep=";", decimal=",", encoding="utf-8-sig")
 # Set the "indexes" column as the index
-df.set_index("DES", inplace=True)
+df = df.set_index("DES")
 # Display the DataFrame
 print(df)
 
@@ -54,10 +62,10 @@ fig.legend(
     frameon=False,
 )
 
+ax1.set_xticks(range(len(df.index)))
 ax1.set_xticklabels(df.index, rotation=45, ha="right")
-plt.tight_layout()
-
+fig.tight_layout()
 
 # Save the plot as a JPEG image
-plt.savefig(r"cosmo_screening_result\COSMO_RS_screening.jpeg", dpi=800)
-plt.show()
+fig.savefig(results_folder / "COSMO_RS_screening.jpeg", dpi=DPI)
+plt.close(fig)

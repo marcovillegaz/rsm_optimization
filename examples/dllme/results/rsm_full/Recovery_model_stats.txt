@@ -3,8 +3,8 @@
 Dep. Variable:               Recovery   R-squared:                       0.910
 Model:                            OLS   Adj. R-squared:                  0.820
 Method:                 Least Squares   F-statistic:                     10.09
-Date:                Mon, 05 Aug 2024   Prob (F-statistic):            0.00101
-Time:                        09:56:57   Log-Likelihood:                -52.215
+Date:                Thu, 29 Oct 2026   Prob (F-statistic):            0.00101
+Time:                        20:30:33   Log-Likelihood:                -52.215
 No. Observations:                  19   AIC:                             124.4
 Df Residuals:                       9   BIC:                             133.9
 Df Model:                           9                                         
@@ -33,3 +33,5 @@ Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 [2] The condition number is large, 3.47e+06. This might indicate that there are
 strong multicollinearity or other numerical problems.
+
+Dropped terms: none

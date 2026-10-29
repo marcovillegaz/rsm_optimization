@@ -1,19 +1,26 @@
-import os
-import pandas as pd
-import matplotlib.pyplot as plt
+"""This script plots the sigma profiles of water, PCB 77 and selected HDES
+obtained from the COSMO-RS calculations"""
 
-# Load the Excel file
-file_path = "cosmo_screening_result\sigma_profiles.xlsx"
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import pandas as pd
+
+repo_root = Path(__file__).resolve().parents[2]
+sigma_file = repo_root / "data" / "dllme" / "cosmo" / "sigma_profiles.xlsx"
+results_folder = Path(__file__).parent / "results" / "cosmo"
 sheet_name = "Hoja2"  # Replace with your actual sheet name if different
-results_folder = "cosmo_screening_result"
 molecules_list = ["Water", "PCB 77", "Lid:Meth(b)", "LacA:ChCl"]
+DPI = 800
+
+results_folder.mkdir(parents=True, exist_ok=True)
 
 # Read the relevant part of the Excel file
-sigma_profile_df = pd.read_excel(file_path, sheet_name=sheet_name)
+sigma_profile_df = pd.read_excel(sigma_file, sheet_name=sheet_name)
 print(sigma_profile_df)
 
 # Create Figure
-plt.figure(figsize=(7, 6))
+fig = plt.figure(figsize=(7, 6))
 
 # Adding vertical lines at -0.01 and +0.01
 plt.axvline(x=-0.01, color="k", linestyle="--", linewidth=1)
@@ -33,9 +40,11 @@ plt.xlim((-0.03, 0.03))
 plt.ylim((0, 50))
 
 # Adding labels and title
-plt.xlabel("$\sigma (e/A^{2})$")
-plt.ylabel("$p(\sigma)$")
+plt.xlabel(r"$\sigma (e/A^{2})$")
+plt.ylabel(r"$p(\sigma)$")
 plt.legend()
 plt.tight_layout()
-# Show the plot
-plt.savefig(os.path.join(results_folder, "sigma_profile.png"), dpi=800)
+
+# Save the plot as a PNG image
+fig.savefig(results_folder / "sigma_profile.png", dpi=DPI)
+plt.close(fig)

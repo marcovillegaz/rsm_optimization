@@ -1,39 +1,57 @@
-"""This script perform the statistic analysis for the univariate anaylisis"""
+"""This script performs the statistical analysis (ANOVA and Tukey HSD) of the
+univariate screenings of the DLLME: extractant solvent and centrifuge time."""
 
-from utils.univariate import *
+from pathlib import Path
 
+from rsm_design._logging import enable_console_logging
+from rsm_design.univariate import group_boxplot, load_groups, one_way_anova
 
-file_path = r"C:\Users\marco\OneDrive - usach.cl\DLLME of PCB77 employing designed DES\Hojas de calculo\Experimental.xlsx"
-response = "Enrichment factor"
+here = Path(__file__).resolve().parent
+experiments_file = here / ".." / ".." / "data" / "dllme" / "experimental_results.xlsx"
+results_folder = here / "results" / "univariate"
 sheet_name = "Screening_3"
+group_column = "Sample name"
+response_column = "Enrichment factor 260"
+n_des_rows = 12  # CONSTANT: first rows are the screening of extractant solvent
 
-print("UNIVARIATE ANALYSIS".center(80, "="))
-# Extract experimental results
-DES_df, centrifuge_df = rearrenge_data(file_path, response, sheet_name)
+####################################################################################
 
-# Perform statistical analysis
+enable_console_logging()
+
+# EXTRACT EXPERIMENTAL RESULTS
+data_df = load_groups(
+    path=experiments_file,
+    sheet=sheet_name,
+    group_column=group_column,
+    response_column=response_column,
+)
+DES_df = data_df.iloc[0:n_des_rows]  # Screening of extractant solvent
+centrifuge_df = data_df.iloc[n_des_rows:]  # Screening of centrifuge time
+
+# STATISTICAL ANALYSIS
 print("extractant solvent".center(80, "-"))
-print("experimental data:\n", DES_df)
-stats_analysis(DES_df)
+DES_result = one_way_anova(df=DES_df)
 
 print("centrifuge time".center(80, "-"))
-print("experimental data:\n", centrifuge_df)
-stats_analysis(centrifuge_df)
+centrifuge_result = one_way_anova(df=centrifuge_df)
 
-# Create box plot for DES
-final_boxplot(
-    DES_df,
+# BOX PLOTS
+group_boxplot(
+    df=DES_df,
     color="tab:blue",
     xlabel="DES",
-    text="(a)",
-    file_name="univariate_results\DES_uni.jpg",
+    ylabel="EF",
+    panel_label="(a)",
+    folder=results_folder,
+    file_name="DES_uni.jpg",
 )
 
-# Create box plot for centrifuge time
-final_boxplot(
-    centrifuge_df,
+group_boxplot(
+    df=centrifuge_df,
     color="tab:orange",
-    xlabel="Centriuge time",
-    text="(b)",
-    file_name="univariate_results\centrifuge_uni.jpg",
+    xlabel="Centrifuge time",
+    ylabel="EF",
+    panel_label="(b)",
+    folder=results_folder,
+    file_name="centrifuge_uni.jpg",
 )

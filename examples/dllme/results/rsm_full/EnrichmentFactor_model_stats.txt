@@ -3,8 +3,8 @@
 Dep. Variable:      Enrichment Factor   R-squared:                       0.904
 Model:                            OLS   Adj. R-squared:                  0.808
 Method:                 Least Squares   F-statistic:                     9.421
-Date:                Mon, 05 Aug 2024   Prob (F-statistic):            0.00131
-Time:                        09:56:58   Log-Likelihood:                -46.590
+Date:                Thu, 29 Oct 2026   Prob (F-statistic):            0.00131
+Time:                        20:30:35   Log-Likelihood:                -46.590
 No. Observations:                  19   AIC:                             113.2
 Df Residuals:                       9   BIC:                             122.6
 Df Model:                           9                                         
@@ -33,3 +33,5 @@ Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 [2] The condition number is large, 3.47e+06. This might indicate that there are
 strong multicollinearity or other numerical problems.
+
+Dropped terms: none
