@@ -33,7 +33,7 @@ and it keeps the optimum inside the experimental region.
 
 ```bash
 # Replace <user> with the GitHub account hosting the repository
-pip install git+https://github.com/<user>/rsm_design      # placeholder URL
+pip install git+https://github.com/marcovillegaz/rsm_design      # placeholder URL
 
 # Development install (editable, with pytest, black, ruff)
 pip install -e ".[dev]"
@@ -96,12 +96,12 @@ Full reference: [docs/cli.md](docs/cli.md).
 
 ## Example outputs
 
-| Surface | Contour |
-|---|---|
+| Surface                                                                                    | Contour                                                                                    |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
 | ![Enrichment factor surface](examples/dllme/results/surfaces/EnrichmentFactor_surface.png) | ![Enrichment factor contour](examples/dllme/results/contours/EnrichmentFactor_contour.png) |
 
-| Diagnostics | Recovery surface |
-|---|---|
+| Diagnostics                                      | Recovery surface                                                          |
+| ------------------------------------------------ | ------------------------------------------------------------------------- |
 | ![Diagnostics grid](assets/diagnostics_grid.png) | ![Recovery surface](examples/dllme/results/surfaces/Recovery_surface.png) |
 
 Optimum found for the enrichment factor (SLSQP, inside the CCD validity ellipsoid): extractant-dispersant ratio 0.393, sample volume 9 mL, extraction mixture volume 249 µL, predicted EF 48.3. It differs slightly from the 2024 scripts, whose optimizer stalled at the ellipsoid boundary; see [docs/methodology.md](docs/methodology.md).
