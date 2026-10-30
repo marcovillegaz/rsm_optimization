@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rsm_design"
+dynamic = ["version"]
+description = "Response Surface Methodology: quadratic model fitting, constrained optimization and publication-quality plots"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Marco Villegas", email = "marcovillegas.g@gmail.com" }]
+keywords = [
+    "response surface methodology",
+    "design of experiments",
+    "central composite design",
+    "chemometrics",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Intended Audience :: Science/Research",
+]
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "statsmodels>=0.14.2",
+    "matplotlib>=3.7",
+    "openpyxl>=3.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=5", "black>=24", "ruff>=0.6"]
+
+[project.scripts]
+rsm-design = "rsm_design.cli:main"
+
+[tool.hatch.version]
+path = "src/rsm_design/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rsm_design"]
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
